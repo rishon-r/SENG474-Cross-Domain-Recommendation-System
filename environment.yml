@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - python=3.11
+  - python=3.13
   - numpy>=1.26
   - scipy>=1.11
   - scikit-learn>=1.4

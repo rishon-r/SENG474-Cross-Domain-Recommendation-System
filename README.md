@@ -28,7 +28,20 @@ After `python quickstart.py` (synthetic data, ~30 s on a laptop CPU):
 ![NDCG vs overlap](evaluation/reports/quickstart_ndcg_vs_overlap.png)
 
 The quickstart prints one line per (strategy, overlap fraction) and writes the table and chart under
-`evaluation/results/quickstart/`.
+`evaluation/results/quickstart/`. A sample run (seed 0, `configs/quickstart.yaml`) gave the NDCG@10 values
+below; `users` is the number of overlap users used to train the mapping.
+
+| Strategy | 10% (110 users) | 20% (221) | 50% (553) | 100% (1107) |
+|---|---|---|---|---|
+| shared   | 0.0826 | 0.0837 | 0.0819 | 0.0878 |
+| cluster  | 0.0823 | 0.0843 | 0.0868 | 0.0817 |
+| specific | 0.0815 | 0.0833 | 0.0856 | 0.0887 |
+
+Baselines (independent of the overlap fraction): popularity 0.0636, random 0.0564.
+
+The data is synthetic, so these numbers only show that the pipeline runs end to end and that every mapping
+beats the baselines. They do not compare the strategies on real data. Your exact values may differ slightly
+on other hardware or PyTorch versions (this run used Python 3.13, PyTorch 2.15, CPU).
 
 ## 3. Prerequisites
 
