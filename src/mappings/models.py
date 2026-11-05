@@ -1,4 +1,4 @@
-"""Mapping networks g: R^k -> R^k (Eq. 3-5 of the paper)."""
+"""Mapping networks g: R^k -> R^k (Section 2 'Mappings' of the paper; trained on L_g, Eq. 3)."""
 import torch
 import torch.nn as nn
 

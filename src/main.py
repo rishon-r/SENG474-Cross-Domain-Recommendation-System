@@ -18,7 +18,7 @@ from src.cmn.seed import set_seed
 from src.data.preprocess import config_hash, make_split, parse_and_cache
 from src.embeddings.mf import train_mf
 from src.evaluation.metrics import build_truth, ndcg_at_n
-from src.evaluation.recommend import make_score_fn, popularity_score_fn, random_score_fn
+from src.evaluation.recommend import history_matrix, make_score_fn, popularity_score_fn, random_score_fn
 from src.mappings.train import STRATEGIES
 
 
@@ -68,6 +68,7 @@ def run(cfg, force=False):
             f"rho_true={split['rho_true']:.3f} test_users={len(split['test_users'])}")
         U_m, U_b, V_b = get_embeddings(cfg, data, split, seed, out_dir, force)
         hist = np.bincount(split["b_train"][0], minlength=int(data["n_users"]))   # |H_b(u)| after the split
+        history = history_matrix(split["b_train"][0], split["b_train"][1], int(data["n_users"]), n_books)
         test_users = split["test_users"]
         assert (hist[test_users] < ev["T"]).all(), "test users must be cold-start"
         truth = build_truth(split["truth"], test_users, n_books)
@@ -86,7 +87,7 @@ def run(cfg, force=False):
             for name, cls in STRATEGIES.items():
                 t0 = time.time()
                 mapper = cls(cfg["embedding"]["k"], cfg["mapping"]).fit(X, Y, seed)
-                record(name, frac, len(O), make_score_fn(mapper, U_m, U_b, V_b, hist, ev["T"]), t0)
+                record(name, frac, len(O), make_score_fn(mapper, U_m, U_b, V_b, hist, ev["T"], history), t0)
 
     write_results(rows, res_dir, ev["n"])
     return rows

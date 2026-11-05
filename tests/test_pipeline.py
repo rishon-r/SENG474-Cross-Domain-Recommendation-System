@@ -110,3 +110,17 @@ def test_cache_is_not_reused_after_settings_change(tmp_path):
     synthetic.make(str(raw), n_users=200, n_items=120, per_user=15, seed=2)   # "re-downloaded" file
     os.utime(m, ns=(1, 1)); os.utime(b, ns=(1, 1))
     assert int(parse_and_cache(m, b, pre)["n_users"]) <= 200         # re-parsed, not the old cache
+
+
+def test_recommend_excludes_history():
+    from src.evaluation.recommend import history_matrix, recommend
+
+    class Identity:
+        def map(self, X):
+            return X
+    V = np.eye(3, dtype=np.float32)                       # book b scores e[b]
+    U = np.array([[3.0, 2.0, 1.0], [3.0, 2.0, 1.0]], dtype=np.float32)
+    hist_counts = np.array([1, 0])                         # user 0 has book 0 in H_b(u); user 1 is cold-start
+    H = history_matrix(np.array([0]), np.array([0]), 2, 3)
+    assert recommend(0, Identity(), U, U, V, hist_counts, 1, 2, H).tolist() == [1, 2]   # book 0 excluded
+    assert recommend(1, Identity(), U, U, V, hist_counts, 1, 2, H).tolist() == [0, 1]   # nothing to exclude

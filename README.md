@@ -108,13 +108,13 @@ src/
   data/         parsing + overlap/test split + subsets
   embeddings/   matrix factorization (Algorithm 1)
   mappings/     models.py (MLP, meta-network) and train.py (shared / cluster / specific)
-  evaluation/   recommend.py (Eq. 6, Algorithm 3), metrics.py (NDCG@n)
+  evaluation/   recommend.py (Eq. 4, Algorithm 3), metrics.py (NDCG@n)
   libs/         (reserved for customized third-party code)
 tests/          pytest suite
 ```
 
 Code ↔ paper: `embeddings/mf.py` = Algorithm 1; `main.py` = Algorithm 2; `mappings/train.py::fit` = `Fit`;
-`evaluation/recommend.py` = Algorithm 3 / Eq. 6.
+`evaluation/recommend.py` = Algorithm 3 / Eq. 4.
 
 ## AI use statement
 
