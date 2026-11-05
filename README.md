@@ -7,7 +7,7 @@ overlap users (users with ratings in both domains) used to train the mapping shr
 Course project, UVic CSC503 × SENG747 / SENG 474 (Fall 2026). Authors: Rishon Rajesh, Sahil Sanghvi,
 Sam Sanjay Satish, Soorya Vasudevan (project lead).
 
-## Overview
+## 1. Overview
 
 1. Learn user/item embeddings in each domain by matrix factorization (mini-batch gradient descent).
 2. Hold out 20% of the overlap users (**O_test**) and remove their book ratings *before any training*.
@@ -21,12 +21,23 @@ The strategies are *simplified* variants inspired by EMCDR (shared), MacCDR (clu
 (specific), trained with one common embedding-oriented loss so the comparison is controlled. They are not
 reproductions of those papers (see the project report for the exact differences).
 
-## Prerequisites
+## 2. Illustrative sample
 
-- Python 3.10+ (tested with 3.13), ~16 GB RAM recommended for the full Books file (≈27 M ratings).
+After `python quickstart.py` (synthetic data, ~30 s on a laptop CPU):
+
+![NDCG vs overlap](evaluation/reports/quickstart_ndcg_vs_overlap.png)
+
+The quickstart prints one line per (strategy, overlap fraction) and writes the table and chart under
+`evaluation/results/quickstart/`.
+
+## 3. Prerequisites
+
+- Python 3.10+ (tested with 3.13 and 3.14). The full Books file has ≈27 M ratings; parsing stores only integer ids,
+  so it fits on a 16 GB laptop.
+- About 8 GB of disk for the two data files (Books ≈7.1 GB, Movies and TV ≈0.8 GB).
 - Packages: see `requirements.txt` (numpy, scipy, scikit-learn, torch, pyyaml, matplotlib, pytest).
 
-## Installation
+## 4. Installation
 
 ```bash
 git clone https://github.com/rishon-r/SENG474-Cross-Domain-Recommendation-System.git
@@ -38,11 +49,72 @@ pip install -r requirements.txt
 
 Download the public dataset (not stored in the repo):
 
+```bash
+bash scripts/download_data.sh        # curl -> data/raw/Movies_and_TV_5.json.gz, Books_5.json.gz (~8 GB; re-run to resume)
+```
 
 Source: <https://cseweb.ucsd.edu/~jmcauley/datasets/amazon_v2> ("Movies and TV" and "Books" 5-core files).
 If a URL in the script is out of date, copy the current link from that page into `scripts/download_data.sh`.
 
+## 5. Quick start
 
+```bash
+python quickstart.py                       # no download needed
+python -m pytest -q                        # tests: no leakage, MF converges, NDCG value, determinism
+```
+
+Full run on the real data:
+
+```bash
+python -m src.main --config configs/default.yaml
+```
+
+For a quick debug pass, set `user_frac: 0.05` in the config. It keeps a fixed 5% of users, chosen by a hash of the
+reviewer ID, so the same users are kept in both files and the overlap is preserved. Parsed data and embeddings are
+cached under file names that include a hash of the settings, so changing `user_frac`, the split or the embedding
+settings never reuses stale files; use `--force` to recompute anyway.
+
+## 6. Results
+
+Real-data results will be added here after the evaluation milestone. The quickstart uses a synthetic dataset
+with planted structure, so its numbers only demonstrate that the pipeline works (mappings beat the popularity
+and random baselines); they say nothing about the Amazon data.
+
+Outputs of a run: `evaluation/results/results.csv` (every seed/strategy/fraction),
+`results_summary.csv` (mean ± std over seeds) and `charts/ndcg_vs_overlap.png`.
+
+## Reproducibility
+
+Given the same data, code, config and seed, a run reproduces the same numbers (`tests/test_pipeline.py::test_same_seed_same_results`).
+Seeds control the test split, subset sampling, embedding initialization and batch order, K-means and network
+initialization (`src/cmn/seed.py`). Exact bit-for-bit equality across different hardware or PyTorch versions is not
+guaranteed. Do **not** tune hyperparameters on O_test.
+
+## Repository structure
+
+```
+README.md  LICENSE  requirements.txt  environment.yml  quickstart.py
+configs/        default.yaml (real data), quickstart.yaml (synthetic)
+scripts/        download_data.sh
+data/raw/       downloaded .json.gz files          (git-ignored)
+data/preprocessed/  parsed rating arrays           (git-ignored)
+output/         embeddings and other artifacts     (git-ignored)
+evaluation/ground_truth/  held-out O_test ratings  (git-ignored)
+evaluation/results/       results.csv, summary, charts
+evaluation/reports/       figures used in docs
+src/
+  main.py       pipeline entry point (Algorithm 2)
+  cmn/          config, seeding, synthetic data generator
+  data/         parsing + overlap/test split + subsets
+  embeddings/   matrix factorization (Algorithm 1)
+  mappings/     models.py (MLP, meta-network) and train.py (shared / cluster / specific)
+  evaluation/   recommend.py (Eq. 6, Algorithm 3), metrics.py (NDCG@n)
+  libs/         (reserved for customized third-party code)
+tests/          pytest suite
+```
+
+Code ↔ paper: `embeddings/mf.py` = Algorithm 1; `main.py` = Algorithm 2; `mappings/train.py::fit` = `Fit`;
+`evaluation/recommend.py` = Algorithm 3 / Eq. 6.
 
 ## AI use statement
 
@@ -50,7 +122,7 @@ This project is a Category D milestone (AI task completion, human evaluation). T
 generated by an AI assistant (Claude, Anthropic) and was reviewed, run and evaluated by the team; see the
 commit history and issues for the team's review and changes. All AI-created content is cited here as required.
 
-## Citation
+## 7. Citation
 
 - Chen, Zang, Li. 2026. *MacCDR: A Memory-Augmented Cluster-Level Preference Mapping Framework for Cross-Domain Cold-Start Recommendation.* BESC 2025, LNCS 16432, 193–207.
 - Man, Shen, Jin, Cheng. 2017. *Cross-Domain Recommendation: An Embedding and Mapping Approach.* IJCAI-17, 2464–2470.
@@ -58,6 +130,6 @@ commit history and issues for the team's review and changes. All AI-created cont
 - Koren, Bell, Volinsky. 2009. *Matrix Factorization Techniques for Recommender Systems.* Computer 42(8), 30–37.
 - Ni, Li, McAuley. 2019. *Justifying Recommendations using Distantly-Labeled Reviews and Fine-Grained Aspects.* EMNLP-IJCNLP, 188–197 (Amazon Review Data 2018).
 
-## License
+## 8. License
 
 MIT — see `LICENSE`.

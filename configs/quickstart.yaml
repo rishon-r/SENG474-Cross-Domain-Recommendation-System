@@ -1,0 +1,12 @@
+# Tiny synthetic run: finishes in well under a minute on a laptop CPU.
+seeds: [0]
+data:
+  movies_path: data/raw_synthetic/Movies_and_TV_5.json.gz
+  books_path: data/raw_synthetic/Books_5.json.gz
+  preprocessed_dir: data/preprocessed_synthetic
+  user_frac: null
+split: {test_frac: 0.2, fractions: [0.1, 0.2, 0.5, 1.0]}
+embedding: {k: 8, lam: 0.02, lr: 20.0, batch_size: 256, epochs: 30}
+mapping: {hidden: 32, meta_hidden: 32, K: 3, lr: 0.05, batch_size: 32, epochs: 60, optimizer: sgd}
+eval: {T: 1, n: 10, user_batch: 64}
+output: {dir: output/quickstart, results_dir: evaluation/results/quickstart, ground_truth_dir: evaluation/ground_truth/quickstart}

@@ -1,0 +1,16 @@
+# data and generated artifacts (downloaded / produced by the pipeline)
+data/raw/*
+data/preprocessed/*
+data/raw_synthetic/
+data/preprocessed_synthetic/
+output/*
+evaluation/ground_truth/*
+evaluation/results/*
+!**/.gitkeep
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.DS_Store

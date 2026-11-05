@@ -1,14 +1,7 @@
-# data and generated artifacts (downloaded / produced by the pipeline)
-data/raw/*
-data/preprocessed/*
-output/*
-evaluation/ground_truth/*
-evaluation/results/*
-!**/.gitkeep
-# python
-__pycache__/
-*.pyc
-.venv/
-venv/
-.pytest_cache/
-.DS_Store
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.4
+torch>=2.2
+pyyaml>=6.0
+matplotlib>=3.8
+pytest>=8.0

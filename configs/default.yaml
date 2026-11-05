@@ -1,0 +1,13 @@
+# Real run on the Amazon Review Data (2018) 5-core files (see scripts/download_data.sh).
+# Hyperparameters are STARTING VALUES: tune on a validation split, never on O_test.
+seeds: [0, 1, 2]
+data:
+  movies_path: data/raw/Movies_and_TV_5.json.gz
+  books_path: data/raw/Books_5.json.gz
+  preprocessed_dir: data/preprocessed
+  user_frac: null         # e.g. 0.05 = debug run on a fixed 5% of users (same users in both files)
+split: {test_frac: 0.2, fractions: [0.1, 0.2, 0.5, 1.0]}
+embedding: {k: 32, lam: 0.05, lr: 20.0, batch_size: 1024, epochs: 20}
+mapping: {hidden: 64, meta_hidden: 64, K: 5, lr: 0.05, batch_size: 256, epochs: 100, optimizer: sgd}
+eval: {T: 1, n: 10, user_batch: 32}
+output: {dir: output, results_dir: evaluation/results, ground_truth_dir: evaluation/ground_truth}
