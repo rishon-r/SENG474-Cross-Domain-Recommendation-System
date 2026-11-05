@@ -1,0 +1,13 @@
+# Debug run on the real data: a fixed 5% of users (same users in both files), one seed.
+# Use it to check the pipeline end to end and read the overlap size before a full run.
+seeds: [0]
+data:
+  movies_path: data/raw/Movies_and_TV_5.json.gz
+  books_path: data/raw/Books_5.json.gz
+  preprocessed_dir: data/preprocessed
+  user_frac: 0.05
+split: {test_frac: 0.2, fractions: [0.1, 0.2, 0.5, 1.0]}
+embedding: {k: 32, lam: 0.05, lr: 20.0, batch_size: 1024, epochs: 20}
+mapping: {hidden: 64, meta_hidden: 64, K: 5, lr: 0.05, batch_size: 256, epochs: 100, optimizer: sgd}
+eval: {T: 1, n: 10, user_batch: 32}
+output: {dir: output/debug, results_dir: evaluation/results/debug, ground_truth_dir: evaluation/ground_truth/debug}

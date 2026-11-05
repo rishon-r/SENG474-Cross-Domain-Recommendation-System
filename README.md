@@ -69,7 +69,7 @@ Full run on the real data:
 python -m src.main --config configs/default.yaml
 ```
 
-For a quick debug pass, set `user_frac: 0.05` in the config. It keeps a fixed 5% of users, chosen by a hash of the
+For a quick debug pass, run `python -m src.main --config configs/debug.yaml`, or set `user_frac: 0.05` in any config. It keeps a fixed 5% of users, chosen by a hash of the
 reviewer ID, so the same users are kept in both files and the overlap is preserved. Parsed data and embeddings are
 cached under file names that include a hash of the settings, so changing `user_frac`, the split or the embedding
 settings never reuses stale files; use `--force` to recompute anyway.
