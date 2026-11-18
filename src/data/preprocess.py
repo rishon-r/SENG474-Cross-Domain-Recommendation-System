@@ -14,7 +14,7 @@ from array import array
 import numpy as np
 
 # Bump when the parsed format or parsing rules change, so old caches are not reused.
-PARSE_VERSION = 2
+PARSE_VERSION = 3
 
 
 def config_hash(obj) -> str:
@@ -46,16 +46,22 @@ def read_reviews(path, users, user_frac=None):
     """
     items = {}
     u, it, r, t = array("q"), array("q"), array("f"), array("q")
+    dropped = 0
     with gzip.open(path, "rt", encoding="utf-8") as f:
         for line in f:
             rec = json.loads(line)
             rid = rec["reviewerID"]
             if not keep_user(rid, user_frac):
                 continue
+            rating = float(rec["overall"])
+            if not 1.0 <= rating <= 5.0:   # a few records carry overall=0.0 (no star rating)
+                dropped += 1
+                continue
             u.append(users.setdefault(rid, len(users)))
             it.append(items.setdefault(rec["asin"], len(items)))
-            r.append(float(rec["overall"]))
+            r.append(rating)
             t.append(int(rec.get("unixReviewTime", 0)))
+    print(f"  dropped {dropped} records with rating outside 1-5 in {os.path.basename(path)}")
     u, it, t = (np.frombuffer(a, dtype=np.int64) for a in (u, it, t))
     r = np.frombuffer(r, dtype=np.float32)
     n = len(u)
