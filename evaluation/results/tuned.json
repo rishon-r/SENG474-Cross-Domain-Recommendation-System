@@ -1,0 +1,37 @@
+{
+  "k": 64,
+  "mapping": {
+    "shared": {
+      "hidden": 64,
+      "meta_hidden": 64,
+      "K": 5,
+      "lr": 0.05,
+      "batch_size": 256,
+      "epochs": 100,
+      "optimizer": "sgd"
+    },
+    "cluster": {
+      "hidden": 64,
+      "meta_hidden": 64,
+      "K": 5,
+      "lr": 0.1,
+      "batch_size": 256,
+      "epochs": 100,
+      "optimizer": "sgd"
+    },
+    "specific": {
+      "hidden": 64,
+      "meta_hidden": 64,
+      "K": 5,
+      "lr": 0.05,
+      "batch_size": 256,
+      "epochs": 100,
+      "optimizer": "sgd"
+    }
+  },
+  "val_ndcg": {
+    "shared": 9.63e-06,
+    "cluster": 9.09e-06,
+    "specific": 3.186e-05
+  }
+}

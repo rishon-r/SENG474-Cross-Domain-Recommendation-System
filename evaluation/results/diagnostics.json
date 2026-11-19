@@ -1,0 +1,38 @@
+{
+  "seed": 0,
+  "n_test_users_sampled": 2000,
+  "k": 64,
+  "book_emb_spread_train_users": 0.7914,
+  "mse_predict_mean_book_embedding": 0.8218,
+  "median_train_ratings_of_popularity_top10": 16807,
+  "shared": {
+    "train_mse": 0.7877,
+    "mse_reduction_vs_mean_pct": 4.2,
+    "mapped_vector_spread": 0.1549,
+    "distinct_top10_lists": 46,
+    "share_users_with_most_common_list_pct": 38.1,
+    "distinct_books_recommended": 25,
+    "median_train_ratings_of_recommended_books": 5,
+    "share_recommendations_in_popularity_top10_pct": 0.0
+  },
+  "cluster": {
+    "train_mse": 0.7884,
+    "mse_reduction_vs_mean_pct": 4.1,
+    "mapped_vector_spread": 0.1475,
+    "distinct_top10_lists": 37,
+    "share_users_with_most_common_list_pct": 33.9,
+    "distinct_books_recommended": 27,
+    "median_train_ratings_of_recommended_books": 5,
+    "share_recommendations_in_popularity_top10_pct": 0.0
+  },
+  "specific": {
+    "train_mse": 0.789,
+    "mse_reduction_vs_mean_pct": 4.0,
+    "mapped_vector_spread": 0.1605,
+    "distinct_top10_lists": 47,
+    "share_users_with_most_common_list_pct": 33.4,
+    "distinct_books_recommended": 27,
+    "median_train_ratings_of_recommended_books": 5,
+    "share_recommendations_in_popularity_top10_pct": 0.0
+  }
+}
