@@ -17,7 +17,7 @@ from src.cmn.config import load_config
 from src.cmn.seed import set_seed
 from src.data.preprocess import config_hash, make_split, parse_and_cache
 from src.embeddings.mf import train_mf
-from src.evaluation.metrics import build_truth, ndcg_at_n
+from src.evaluation.metrics import build_truth, evaluate_at_n
 from src.evaluation.recommend import history_matrix, make_score_fn, popularity_score_fn, random_score_fn
 from src.mappings.train import STRATEGIES
 
@@ -47,8 +47,21 @@ def get_embeddings(cfg, data, split, seed, out_dir, force):
     return U_m, U_b, V_b
 
 
+def load_tuned(cfg):
+    """If src/tune.py has been run, use its selected embedding size and per-strategy mapping settings."""
+    path = os.path.join(cfg["output"]["results_dir"], "tuned.json")
+    if os.path.exists(path):
+        with open(path) as f:
+            t = json.load(f)
+        cfg["embedding"] = dict(cfg["embedding"], k=t["k"])
+        log(f"Using tuned hyperparameters from {path}: {t}")
+        return t["mapping"]
+    return {}
+
+
 def run(cfg, force=False):
     d, s, ev = cfg["data"], cfg["split"], cfg["eval"]
+    tuned = load_tuned(cfg)
     out_dir = cfg["output"]["dir"]
     res_dir = cfg["output"]["results_dir"]
     for p in (out_dir, res_dir, os.path.join(res_dir, "charts"), cfg["output"]["ground_truth_dir"]):
@@ -74,10 +87,10 @@ def run(cfg, force=False):
         truth = build_truth(split["truth"], test_users, n_books)
 
         def record(name, frac, size, score_fn, t0):
-            v = ndcg_at_n(score_fn, test_users, truth, ev["n"], ev["user_batch"])
-            rows.append(dict(seed=seed, strategy=name, fraction=frac, n_train_users=size, ndcg=v,
+            v, rc = evaluate_at_n(score_fn, test_users, truth, ev["n"], ev["user_batch"])
+            rows.append(dict(seed=seed, strategy=name, fraction=frac, n_train_users=size, ndcg=v, recall=rc,
                              seconds=round(time.time() - t0, 2)))
-            log(f"  {name:10s} frac={frac:<4} users={size:<7} NDCG@{ev['n']}={v:.4f}")
+            log(f"  {name:10s} frac={frac:<4} users={size:<7} NDCG@{ev['n']}={v:.4f} Recall@{ev['n']}={rc:.4f}")
 
         record("popularity", "-", 0, popularity_score_fn(split["b_train"][1], n_books), time.time())
         record("random", "-", 0, random_score_fn(n_books, seed), time.time())
@@ -86,7 +99,7 @@ def run(cfg, force=False):
             X, Y = U_m[O], U_b[O]
             for name, cls in STRATEGIES.items():
                 t0 = time.time()
-                mapper = cls(cfg["embedding"]["k"], cfg["mapping"]).fit(X, Y, seed)
+                mapper = cls(cfg["embedding"]["k"], tuned.get(name, cfg["mapping"])).fit(X, Y, seed)
                 record(name, frac, len(O), make_score_fn(mapper, U_m, U_b, V_b, hist, ev["T"], history), t0)
 
     write_results(rows, res_dir, ev["n"])
@@ -103,14 +116,17 @@ def write_results(rows, res_dir, n):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    summary = {}
+    summary, rsummary = {}, {}
     for r in rows:
         summary.setdefault((r["strategy"], r["fraction"]), []).append(r["ndcg"])
+        rsummary.setdefault((r["strategy"], r["fraction"]), []).append(r["recall"])
     with open(os.path.join(res_dir, "results_summary.csv"), "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["strategy", "fraction", "ndcg_mean", "ndcg_std", "n_seeds"])
+        w.writerow(["strategy", "fraction", "ndcg_mean", "ndcg_std", "recall_mean", "recall_std", "n_seeds"])
         for (s, fr), v in summary.items():
-            w.writerow([s, fr, round(float(np.mean(v)), 5), round(float(np.std(v)), 5), len(v)])
+            rv = rsummary[(s, fr)]
+            w.writerow([s, fr, round(float(np.mean(v)), 8), round(float(np.std(v)), 8),
+                        round(float(np.mean(rv)), 8), round(float(np.std(rv)), 8), len(v)])
     fig, ax = plt.subplots(figsize=(5, 3.4))
     fracs = sorted({fr for (_, fr) in summary if fr != "-"})
     for s in ("shared", "cluster", "specific"):

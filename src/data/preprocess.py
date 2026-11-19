@@ -48,7 +48,9 @@ def read_reviews(path, users, user_frac=None):
     u, it, r, t = array("q"), array("q"), array("f"), array("q")
     dropped = 0
     with gzip.open(path, "rt", encoding="utf-8") as f:
-        for line in f:
+        for n_lines, line in enumerate(f, 1):
+            if n_lines % 2_000_000 == 0:
+                print(f"  {os.path.basename(path)}: {n_lines:,} lines read", flush=True)
             rec = json.loads(line)
             rid = rec["reviewerID"]
             if not keep_user(rid, user_frac):
@@ -61,7 +63,7 @@ def read_reviews(path, users, user_frac=None):
             it.append(items.setdefault(rec["asin"], len(items)))
             r.append(rating)
             t.append(int(rec.get("unixReviewTime", 0)))
-    print(f"  dropped {dropped} records with rating outside 1-5 in {os.path.basename(path)}")
+    print(f"  dropped {dropped} records with rating outside 1-5 in {os.path.basename(path)}", flush=True)
     u, it, t = (np.frombuffer(a, dtype=np.int64) for a in (u, it, t))
     r = np.frombuffer(r, dtype=np.float32)
     n = len(u)

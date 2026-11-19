@@ -76,11 +76,16 @@ python quickstart.py                       # no download needed
 python -m pytest -q                        # tests: no leakage, MF converges, NDCG value, determinism
 ```
 
-Full run on the real data:
+Full run on the real data (about 2 hours in total on an M1 laptop with 16 GB RAM):
 
 ```bash
-python -m src.main --config configs/default.yaml
+python -m src.tune --config configs/default.yaml    # RQ2: 3-fold CV on development users -> tuned.json (~70 min)
+python -m src.main --config configs/default.yaml    # RQ1: final test run, uses tuned.json if present (~40 min)
+python -m scripts.diagnose_mappings --config configs/default.yaml   # optional: why the mappings fail (~3 min)
 ```
+
+Tuning never touches the final test users: it splits only the development (training overlap) users into folds,
+and validation users' book ratings are removed before the book embeddings are trained.
 
 For a quick debug pass, run `python -m src.main --config configs/debug.yaml`, or set `user_frac: 0.05` in any config. It keeps a fixed 5% of users, chosen by a hash of the
 reviewer ID, so the same users are kept in both files and the overlap is preserved. Parsed data and embeddings are
@@ -89,7 +94,20 @@ settings never reuses stale files; use `--force` to recompute anyway.
 
 ## 6. Results
 
-Real-data results will be added here after the evaluation milestone. The quickstart uses a synthetic dataset
+Real-data results (Milestone 4, full 5-core data, seeds 0–2, 23,271 cold-start test users, tuned k = 64):
+
+| | 10% | 20% | 50% | 100% of training overlap users |
+|---|---|---|---|---|
+| Shared NDCG@10 | 0.0000078 | 0.0000079 | 0.0000087 | 0.0000070 |
+| Cluster NDCG@10 | 0.0000072 | 0.0000070 | 0.0000071 | 0.0000069 |
+| Specific NDCG@10 | 0.0000080 | 0.0000076 | 0.0000086 | 0.0000079 |
+
+Popularity NDCG@10 = 0.0117 ± 0.0002, random = 0.00003. No mapping strategy beats popularity at any overlap size;
+`scripts/diagnose_mappings.py` shows that all mappings collapse to nearly the same "average reader" vector, because
+the rating-trained embeddings carry little information about which books a user reads. Full numbers, including
+Recall@10: `evaluation/results/results_summary.csv`, `tune_summary.csv`, `diagnostics.json`.
+
+The quickstart uses a synthetic dataset
 with planted structure, so its numbers only demonstrate that the pipeline works (mappings beat the popularity
 and random baselines); they say nothing about the Amazon data.
 
