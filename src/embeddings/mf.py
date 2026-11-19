@@ -7,6 +7,8 @@ The constant 2 of the gradient is absorbed into the step size alpha (= lr). As i
 pseudocode, the accumulated update of a batch is divided by the batch size |S|, so lr is the
 step on the batch-MEAN gradient (it is therefore larger than a per-rating SGD step).
 """
+import time
+
 import numpy as np
 import torch
 
@@ -17,6 +19,7 @@ def train_mf(user, item, rating, n_users, n_items, k, lam, lr, batch_size, epoch
     Q = torch.randn(n_items, k, generator=gen) * 0.01
     u, i, r = (torch.as_tensor(a) for a in (user, item, rating))
     n = len(u)
+    t0 = time.time()
     for epoch in range(epochs):
         perm = torch.randperm(n, generator=gen)
         sq = 0.0
@@ -31,5 +34,5 @@ def train_mf(user, item, rating, n_users, n_items, k, lam, lr, batch_size, epoch
             P.index_add_(0, bu, err[:, None] * qi - lam * pu, alpha=lr / B)
             Q.index_add_(0, bi, err[:, None] * pu - lam * qi, alpha=lr / B)
         if log:
-            log(f"  epoch {epoch + 1}/{epochs}  train RMSE {np.sqrt(sq / n):.4f}")
+            log(f"  epoch {epoch + 1}/{epochs}  train RMSE {np.sqrt(sq / n):.4f}  ({time.time() - t0:.0f}s elapsed)")
     return P.numpy(), Q.numpy()
