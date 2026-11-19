@@ -25,3 +25,10 @@ Maintained by the project lead (Soorya Vasudevan). Updated at each milestone; co
 | Rishon Rajesh | Formal definition math and pseudo-code; initial README and requirements |
 | Sam Sanjay Satish | Pipeline implementation (`src/`), quickstart, tests, configs incl. debug run, README updates |
 | Sahil Sanghvi | Abstract and introduction; illustrative pipeline figure (Figure 1); Implementation section and AI-use citation; references and LaTeX formatting of the report |
+## Milestone 4: Evaluation (Nov 18, 2026)
+| Member | Contributions |
+|---|---|
+| Soorya Vasudevan (lead) | verified code against the method; analysis of why mappings score below random; report review against the marking scheme; coordination |
+| Rishon Rajesh | Evaluation strategy and hyperparameter grid; Research questions, dataset section and statistics, experiment design; preprocessing |
+| Sam Sanjay Satish | Cross-validation and final test runs on full data; mapping diagnostic; results files and charts in the repo; report assembly |
+| Sahil Sanghvi | Code and cross-validation experiments; baselines |
